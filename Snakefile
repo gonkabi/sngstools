@@ -2,7 +2,7 @@
 ## Setting ############################################
 TARGET_SRR = "data/raw/target_srr.txt"
 NUM_ARRAY = "1-3"
-NUM_SLOT = 8
+NUM_SLOT = 4
 
 ## Rule ###############################################
 rule download_sra: # use prefetch
@@ -44,9 +44,10 @@ rule qc_summary: # use multiqc
         jobname = "qc_summary",
         #indir_path = "/home/bminfob/ncbi/public/result_fastqc/",
         #outdir_path = "/home/bminfob/ncbi/public/result_fastqc/",
-        indir_path = "output/trim_fastq/",
-        outdir_path = "output/trim_fastq/",
-        outfile_name = "multiqc_report"
+        #outfile_name = "multiqc_report"
+        indir_path = "output/trim_fastq/fastqc/",
+        outdir_path = "output/trim_fastq/fastqc/",
+        outfile_name = "trim_multiqc_report"
     shell:
         "qsub -N {params.jobname} ./src/qc_summary.sh {input.target} {params.indir_path} {params.outdir_path} {params.outfile_name}"
 
@@ -71,8 +72,8 @@ rule qc_trim: # use fastqc
         array = NUM_ARRAY,
         slot = NUM_SLOT,
         jobname = "qc_trim",
-        indir_path = "output/trim_fastq/",
-        outdir_path = "output/trim_fastq/",
-        select_file = "trim-paired" # set {trim-paired or trim-unpaired}
+        indir_path = "output/trim_fastq/fastqc/",
+        outdir_path = "output/trim_fastq/fastqc/",
+        select_file = "trim-paired" # set {SE:trim, PE:trim-paired or trim-unpaired}
     shell:
         "qsub -t {params.array} -pe def_slot {params.slot} -N {params.jobname} ./src/qc_trim.sh {input.target} {params.slot} {params.indir_path} {params.outdir_path} {params.select_file}"
